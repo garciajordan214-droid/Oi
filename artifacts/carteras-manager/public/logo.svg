@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 44" fill="none">
+  <rect x="1" y="4" width="36" height="36" rx="11" fill="#2B5B50"/>
+  <path d="M26.7 16.1a10.2 10.2 0 1 0 0 11.8h-6a4.4 4.4 0 1 1 0-6h6v-5.8Z" fill="#F7F2E4"/>
+  <text x="47" y="30" fill="#25483F" font-family="Manrope, sans-serif" font-size="21" font-weight="800" letter-spacing="-1.1">carteras</text>
+  <circle cx="131" cy="28" r="2.4" fill="#C9A958"/>
+</svg>

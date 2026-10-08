@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Carteras Manager"
+description = "Aplicación web/PWA para administrar clientes, préstamos separados, cuotas, abonos e historial con persistencia PostgreSQL y auditoría."
+version = "1.0.0"
+id = "artifacts/carteras-manager"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19024
+
+[services.development]
+run = "pnpm --filter @workspace/carteras-manager run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/carteras-manager", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/carteras-manager/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19024"
+BASE_PATH = "/"

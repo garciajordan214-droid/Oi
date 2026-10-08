@@ -3,20 +3,24 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API do Carteras Manager - módulo financeiro 1
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: auth
+  - name: dashboard
+  - name: clients
+  - name: loans
+  - name: payments
+  - name: audit
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +28,477 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Retorna o perfil do usuário autenticado
+      responses:
+        "200":
+          description: Perfil ativo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppUser"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: syncCurrentUser
+      tags: [auth]
+      summary: Sincroniza o perfil do usuário autenticado no primeiro acesso
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserProfileInput"
+      responses:
+        "200":
+          description: Perfil sincronizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppUser"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Indicadores financeiros do módulo 1
+      responses:
+        "200":
+          description: Resumo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /clients:
+    get:
+      operationId: listClients
+      tags: [clients]
+      summary: Lista e pesquisa clientes
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: status
+          schema: { $ref: "#/components/schemas/ClientStatus" }
+      responses:
+        "200":
+          description: Clientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Client" }
+    post:
+      operationId: createClient
+      tags: [clients]
+      summary: Cria cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ClientInput" }
+      responses:
+        "201":
+          description: Cliente criado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Client" }
+  /clients/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      operationId: getClient
+      tags: [clients]
+      summary: Consulta cliente
+      responses:
+        "200":
+          description: Cliente
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Client" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      operationId: updateClient
+      tags: [clients]
+      summary: Atualiza dados do cliente sem remover seu histórico
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ClientUpdate" }
+      responses:
+        "200":
+          description: Cliente atualizado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Client" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /clients/{id}/history:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      operationId: getClientHistory
+      tags: [clients]
+      summary: Histórico financeiro separado por empréstimo
+      responses:
+        "200":
+          description: Histórico completo do cliente
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ClientHistory" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /loans:
+    get:
+      operationId: listLoans
+      tags: [loans]
+      summary: Lista empréstimos e filtros
+      parameters:
+        - in: query
+          name: clientId
+          schema: { type: string, format: uuid }
+        - in: query
+          name: status
+          schema: { $ref: "#/components/schemas/LoanStatus" }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        "200":
+          description: Empréstimos
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/LoanSummary" }
+    post:
+      operationId: createLoan
+      tags: [loans]
+      summary: Cria um novo empréstimo e gera suas parcelas em transação
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoanInput" }
+      responses:
+        "201":
+          description: Empréstimo e parcelas criados
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Loan" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /loans/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      operationId: getLoan
+      tags: [loans]
+      summary: Consulta empréstimo, parcelas e pagamentos
+      responses:
+        "200":
+          description: Detalhes completos
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoanDetail" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /loans/{id}/status:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    patch:
+      operationId: changeLoanStatus
+      tags: [loans]
+      summary: Liquida ou cancela sem excluir o empréstimo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoanStatusInput" }
+      responses:
+        "200":
+          description: Estado atualizado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Loan" }
+        "409":
+          description: Transição inválida ou saldo em aberto
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /loans/{id}/payments:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    post:
+      operationId: registerPayment
+      tags: [payments]
+      summary: Registra um abono parcial ou total com auditoria
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PaymentInput" }
+      responses:
+        "201":
+          description: Abono registrado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Payment" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Saldo insuficiente, parcela incompatível ou empréstimo encerrado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /audit:
+    get:
+      operationId: listAuditEvents
+      tags: [audit]
+      summary: Consulta eventos de auditoria recentes
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+      responses:
+        "200":
+          description: Eventos registrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AuditEvent" }
 components:
+  parameters:
+    Id:
+      in: path
+      name: id
+      required: true
+      schema: { type: string, format: uuid }
+  responses:
+    Unauthorized:
+      description: Autenticação obrigatória
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Registro não encontrado
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
-        status:
-          type: string
-      required:
-        - status
+        status: { type: string }
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+    ClientStatus:
+      type: string
+      enum: [ATIVO, INATIVO]
+    LoanStatus:
+      type: string
+      enum: [ATIVO, EN_ATRASO, LIQUIDADO, CANCELADO]
+    InstallmentStatus:
+      type: string
+      enum: [PENDENTE, PAGADA, PARCIAL, ATRASADA, CANCELADA]
+    PaymentMethod:
+      type: string
+      enum: [EFETIVO, PIX, TRANSFERENCIA, OTRO]
+    AppUser:
+      type: object
+      required: [id, clerkUserId, name, email, role, status, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        clerkUserId: { type: string }
+        name: { type: string }
+        email: { type: string, format: email }
+        role: { type: string, enum: [ADMIN, COBRADOR] }
+        status: { type: string, enum: [ATIVO, INATIVO] }
+        createdAt: { type: string, format: date-time }
+    UserProfileInput:
+      type: object
+      required: [name, email]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 180 }
+        email: { type: string, format: email, maxLength: 254 }
+    Client:
+      type: object
+      required: [id, code, fullName, phone1, status, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        fullName: { type: string }
+        phone1: { type: string }
+        phone2: { type: [string, "null"] }
+        whatsapp: { type: [string, "null"] }
+        documentType: { type: [string, "null"] }
+        documentNumber: { type: [string, "null"] }
+        referencePoint: { type: [string, "null"] }
+        route: { type: [string, "null"] }
+        status: { $ref: "#/components/schemas/ClientStatus" }
+        notes: { type: [string, "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ClientInput:
+      type: object
+      required: [fullName, phone1]
+      properties:
+        fullName: { type: string, minLength: 1, maxLength: 180 }
+        phone1: { type: string, minLength: 1, maxLength: 32 }
+        phone2: { type: [string, "null"], maxLength: 32 }
+        whatsapp: { type: [string, "null"], maxLength: 32 }
+        documentType: { type: [string, "null"], maxLength: 40 }
+        documentNumber: { type: [string, "null"], maxLength: 80 }
+        referencePoint: { type: [string, "null"], maxLength: 300 }
+        route: { type: [string, "null"], maxLength: 120 }
+        status: { $ref: "#/components/schemas/ClientStatus" }
+        notes: { type: [string, "null"], maxLength: 3000 }
+    ClientUpdate:
+      allOf:
+        - $ref: "#/components/schemas/ClientInput"
+    Loan:
+      type: object
+      required: [id, code, clientId, netAmount, interestRate, lateInterestRate, installmentCount, term, frequency, totalAmount, installmentAmount, loanDate, firstDueDate, status, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        clientId: { type: string, format: uuid }
+        netAmount: { type: number }
+        interestRate: { type: number }
+        lateInterestRate: { type: number }
+        installmentCount: { type: integer }
+        term: { type: string }
+        frequency: { type: string, enum: [DIARIA, SEMANAL, QUINCENAL, MENSUAL] }
+        paymentDay: { type: ["integer", "null"] }
+        totalAmount: { type: number }
+        installmentAmount: { type: number }
+        loanDate: { type: string, format: date }
+        firstDueDate: { type: string, format: date }
+        status: { $ref: "#/components/schemas/LoanStatus" }
+        notes: { type: [string, "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    LoanInput:
+      type: object
+      required: [clientId, netAmount, interestRate, lateInterestRate, installmentCount, term, frequency, loanDate, firstDueDate]
+      properties:
+        clientId: { type: string, format: uuid }
+        netAmount: { type: number, exclusiveMinimum: 0 }
+        interestRate: { type: number, minimum: 0, maximum: 10000 }
+        lateInterestRate: { type: number, minimum: 0, maximum: 10000 }
+        installmentCount: { type: integer, minimum: 1, maximum: 1200 }
+        term: { type: string, minLength: 1, maxLength: 120 }
+        frequency: { type: string, enum: [DIARIA, SEMANAL, QUINCENAL, MENSUAL] }
+        paymentDay: { type: ["integer", "null"], minimum: 1, maximum: 31 }
+        loanDate: { type: string, format: date }
+        firstDueDate: { type: string, format: date }
+        notes: { type: [string, "null"], maxLength: 3000 }
+    LoanSummary:
+      allOf:
+        - $ref: "#/components/schemas/Loan"
+        - type: object
+          required: [clientName, paidInstallments, pendingInstallments, paidAmount, balance]
+          properties:
+            clientName: { type: string }
+            paidInstallments: { type: integer }
+            pendingInstallments: { type: integer }
+            paidAmount: { type: number }
+            balance: { type: number }
+    LoanStatusInput:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [LIQUIDADO, CANCELADO] }
+        notes: { type: [string, "null"], maxLength: 1000 }
+    Installment:
+      type: object
+      required: [id, loanId, number, dueDate, scheduledAmount, paidAmount, balance, status]
+      properties:
+        id: { type: string, format: uuid }
+        loanId: { type: string, format: uuid }
+        number: { type: integer }
+        dueDate: { type: string, format: date }
+        scheduledAmount: { type: number }
+        paidAmount: { type: number }
+        balance: { type: number }
+        status: { $ref: "#/components/schemas/InstallmentStatus" }
+        paidAt: { type: ["string", "null"], format: date-time }
+        notes: { type: [string, "null"] }
+    Payment:
+      type: object
+      required: [id, code, clientId, loanId, installmentId, totalAmount, principalAmount, lateAmount, method, paidAt, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        clientId: { type: string, format: uuid }
+        loanId: { type: string, format: uuid }
+        installmentId: { type: string, format: uuid }
+        totalAmount: { type: number }
+        principalAmount: { type: number }
+        lateAmount: { type: number }
+        method: { $ref: "#/components/schemas/PaymentMethod" }
+        paidAt: { type: string, format: date-time }
+        notes: { type: [string, "null"] }
+        registeredBy: { type: string }
+        createdAt: { type: string, format: date-time }
+    PaymentInput:
+      type: object
+      required: [installmentId, principalAmount, method, idempotencyKey]
+      properties:
+        installmentId: { type: string, format: uuid }
+        principalAmount: { type: number, exclusiveMinimum: 0 }
+        method: { $ref: "#/components/schemas/PaymentMethod" }
+        idempotencyKey: { type: string, format: uuid }
+        paidAt: { type: ["string", "null"], format: date-time }
+        notes: { type: [string, "null"], maxLength: 1000 }
+    LoanDetail:
+      type: object
+      required: [loan, clientName, installments, payments]
+      properties:
+        loan: { $ref: "#/components/schemas/LoanSummary" }
+        clientName: { type: string }
+        installments:
+          type: array
+          items: { $ref: "#/components/schemas/Installment" }
+        payments:
+          type: array
+          items: { $ref: "#/components/schemas/Payment" }
+    ClientHistory:
+      type: object
+      required: [client, loans]
+      properties:
+        client: { $ref: "#/components/schemas/Client" }
+        loans:
+          type: array
+          items: { $ref: "#/components/schemas/LoanSummary" }
+    DashboardSummary:
+      type: object
+      required: [activeClients, activeLoans, overdueLoans, totalReceivable, receivedThisMonth, recentPayments]
+      properties:
+        activeClients: { type: integer }
+        activeLoans: { type: integer }
+        overdueLoans: { type: integer }
+        totalReceivable: { type: number }
+        receivedThisMonth: { type: number }
+        recentPayments:
+          type: array
+          items: { $ref: "#/components/schemas/Payment" }
+    AuditEvent:
+      type: object
+      required: [id, userId, action, entity, entityId, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string }
+        action: { type: string }
+        entity: { type: string }
+        entityId: { type: string, format: uuid }
+        beforeData: { type: [object, "null"], additionalProperties: true }
+        afterData: { type: [object, "null"], additionalProperties: true }
+        createdAt: { type: string, format: date-time }
 
