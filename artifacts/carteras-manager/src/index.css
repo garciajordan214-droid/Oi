@@ -1,5 +1,7 @@
+@layer theme, base, clerk, components, utilities;
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 @import 'tailwindcss';
+@import '@clerk/themes/shadcn.css';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
 @custom-variant dark (&:is(.dark *));
@@ -334,3 +336,33 @@ td small.table-sub { display:block; margin-top:4px; color:#9b9d91; font-size:10p
   .welcome-copy h1 { font-size:40px; }.welcome-actions { align-items:flex-start; flex-direction:column; gap:13px; }.welcome-art { min-height:340px; }
   .back-link { flex-wrap:wrap; }.loan-actions>div { flex-direction:column; }.loan-actions .button { width:100%; }
 }
+
+.payment-info-field {
+  display: flex;
+  min-height: 4.5rem;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #dce5df;
+  border-radius: 0.75rem;
+  background: #f1f6f2;
+  color: #28574e;
+  font-size: 0.82rem;
+}
+.payment-info-field span { color: #65766e; line-height: 1.5; }
+.calculation-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin: -0.35rem 0 1.1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #dce5df;
+  border-radius: 0.75rem;
+  background: #f1f6f2;
+  color: #28574e;
+}
+.calculation-note span { display: flex; flex-direction: column; gap: 0.25rem; }
+.calculation-note small { color: #65766e; line-height: 1.5; }
+.welcome-art-title { display: block; font-size: clamp(1.8rem, 3vw, 2.35rem); line-height: 1.15; }
+.welcome-art-title em { color: #c8a660; font-style: normal; }

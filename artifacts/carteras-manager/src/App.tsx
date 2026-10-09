@@ -93,10 +93,11 @@ function ClerkProfileSync() {
   return null;
 }
 function Home() {
-  return <main className="welcome-page"><header className="welcome-nav"><Link href="/"><Brand/></Link><span className="welcome-nav-note"><ShieldCheck size={15}/> Ambiente financeiro protegido</span></header>
+  return <main className="welcome-page">
+    <header className="welcome-nav"><Link href="/"><Brand/></Link><span className="welcome-nav-note"><ShieldCheck size={15}/> Ambiente financeiro protegido</span></header>
     <section className="welcome-hero">
       <div className="welcome-copy rise-in"><div className="eyebrow"><span className="eyebrow-dot"/> Carteras Manager · Módulo financeiro</div><h1>Uma carteira em ordem.<br/><em>Decisões mais claras.</em></h1><p>Clientes, empréstimos, parcelas e pagamentos — cada informação no seu lugar, cada decisão com contexto.</p><div className="welcome-actions"><Link className="button button-primary" href="/sign-up">Começar agora <ArrowRight size={16}/></Link><Link className="welcome-signin" href="/sign-in">Já tenho acesso <ArrowRight size={14}/></Link></div><div className="trust-line"><span><BadgeCheck size={16}/> Histórico separado por cliente</span><span><BadgeCheck size={16}/> Valores sempre rastreáveis</span></div></div>
-      <div className="welcome-art" aria-label="Visão organizada de uma carteira financeira"><div className="art-caption">VISÃO DA CARTEIRA <span>01 / 03</span></div><div className="art-orbit orbit-one"/><div className="art-orbit orbit-two"/><div className="art-center"><div className="art-center-top"><span>RECEBÍVEIS</span><span className="art-live"><i/> atualizado</span></div><strong>R$ 28.640<span>,00</span></strong><div className="art-rule"/><div className="art-mini"><span>parcelas registradas</span><b>184</b></div><div className="art-mini"><span>clientes ativos</span><b>32</b></div></div><div className="art-note note-one"><span className="note-icon"><UsersRound size={15}/></span><span><b>Histórico individual</b><small>cada cliente, uma visão completa</small></span></div><div className="art-note note-two"><span className="note-icon note-gold"><CircleDollarSign size={15}/></span><span><b>Pagamento registrado</b><small>PIX · hoje, 10:42</small></span><Check size={14} className="note-check"/></div><div className="art-corner">PRECISÃO NO DIA A DIA</div></div>
+      <div className="welcome-art" aria-label="Fluxo de registros financeiros conectados"><div className="art-caption">FLUXO FINANCEIRO <span>MÓDULO 01</span></div><div className="art-orbit orbit-one"/><div className="art-orbit orbit-two"/><div className="art-center"><div className="art-center-top"><span>CARTEIRA ORGANIZADA</span><span className="art-live"><i/> persistência no servidor</span></div><strong className="welcome-art-title">Cada contrato,<br/><em>no seu lugar.</em></strong><div className="art-rule"/><div className="art-mini"><span>cliente → empréstimo</span><b><UsersRound size={15}/></b></div><div className="art-mini"><span>parcela → abono</span><b><ShieldCheck size={15}/></b></div></div><div className="art-note note-one"><span className="note-icon"><UsersRound size={15}/></span><span><b>Histórico individual</b><small>cada cliente, uma visão completa</small></span></div><div className="art-note note-two"><span className="note-icon note-gold"><CircleDollarSign size={15}/></span><span><b>Registro confiável</b><small>pagamentos vinculados à parcela</small></span><Check size={14} className="note-check"/></div><div className="art-corner">PRECISÃO NO DIA A DIA</div></div>
     </section><section className="welcome-principles"><div><span>01</span><b>Separação que importa</b><p>Histórico do cliente sem misturar contratos ou parcelas.</p></div><div><span>02</span><b>Visão sem ruído</b><p>Saldo, vencimento e recebimento no contexto certo.</p></div><div><span>03</span><b>Registro confiável</b><p>Um espaço seguro para sua rotina de cobrança.</p></div></section><footer className="welcome-footer"><Brand/><span>Gestão financeira com clareza.</span><span>© Carteras Manager</span></footer>
   </main>;
 }
@@ -139,7 +140,7 @@ function DashboardPage() {
 function Metric({ label, value, detail, icon, tone }: { label: string; value: string; detail: string; icon: ReactNode; tone: string }) { return <Panel className="metric-card"><div className={`metric-icon metric-${tone}`}>{icon}</div><div className="metric-label">{label}</div><div className="metric-value">{value}</div><div className="metric-detail">{detail}</div></Panel>; }
 function RecentPayments({ payments }: { payments: Payment[] }) {
   if (!payments.length) return <EmptyState title="Nenhum pagamento por aqui" detail="Quando um pagamento for registrado, ele aparecerá nesta lista." action={<Link className="button button-secondary" href="/loans">Consultar carteira</Link>}/>;
-  return <div className="table-wrap"><table><thead><tr><th>Registro</th><th>Forma</th><th>Data</th><th className="align-right">Valor recebido</th><th/></tr></thead><tbody>{payments.map(p => <tr key={p.id} data-testid={`row-payment-${p.id}`}><td><span className="record-code">{p.code}</span><small className="table-sub">{p.notes || 'Parcela registrada'}</small></td><td><span className="method-label"><span className="method-dot"/>{methodLabel[p.method] || p.method}</span></td><td>{dateTime(p.paidAt)}</td><td className="align-right amount-cell">{money(p.totalAmount)}</td><td><Link className="row-arrow" href={`/loans/${p.loanId}`} aria-label={`Ver empréstimo ${p.loanId}`}><ArrowRight size={15}/></Link></td></tr>)}</tbody></table></div>;
+  return <div className="table-wrap"><table><thead><tr><th>Registro</th><th>Forma</th><th>Data</th><th className="align-right">Valor recebido</th><th/></tr></thead><tbody>{payments.map(p => <tr key={p.id} data-testid={`row-payment-${p.id}`}><td><span className="record-code">{p.code}</span><small className="table-sub">{money(p.principalAmount)} destinado à parcela · {money(p.lateAmount)} mora</small>{p.notes && <small className="table-sub">{p.notes}</small>}</td><td><span className="method-label"><span className="method-dot"/>{methodLabel[p.method] || p.method}</span></td><td>{dateTime(p.paidAt)}</td><td className="align-right amount-cell">{money(p.totalAmount)}</td><td><Link className="row-arrow" href={`/loans/${p.loanId}`} aria-label={`Ver empréstimo ${p.loanId}`}><ArrowRight size={15}/></Link></td></tr>)}</tbody></table></div>;
 }
 function ClientsPage() {
   const [search, setSearch] = useState('');
@@ -167,7 +168,9 @@ function ClientProfilePage() {
   </>;
 }
 function Detail({ label, value }: { label: string; value: string }) { return <div className="detail-row"><span>{label}</span><b>{value}</b></div>; }
-function LoanTable({ loans }: { loans: LoanSummary[] }) { return <div className="table-wrap"><table><thead><tr><th>Empréstimo</th><th>Data</th><th>Parcelas pagas</th><th>Status</th><th className="align-right">Saldo</th><th/></tr></thead><tbody>{loans.map(l => <tr key={l.id}><td><Link className="record-link" href={`/loans/${l.id}`}>{l.code}</Link><small className="table-sub">{money(l.totalAmount)} total</small></td><td>{date(l.loanDate)}</td><td>{l.paidInstallments} / {l.installmentCount}</td><td><StatusPill status={l.status}/></td><td className="align-right amount-cell">{money(l.balance)}</td><td><Link className="row-arrow" href={`/loans/${l.id}`} aria-label={`Abrir empréstimo ${l.code}`}><ArrowRight size={15}/></Link></td></tr>)}</tbody></table></div>; }
+function LoanTable({ loans }: { loans: LoanSummary[] }) {
+  return <div className="table-wrap"><table><thead><tr><th>Empréstimo</th><th>Data</th><th>Valor emprestado</th><th>Juros</th><th>Total</th><th>Parcelas</th><th>Recebido</th><th>Status</th><th className="align-right">Saldo</th><th/></tr></thead><tbody>{loans.map(l => <tr key={l.id}><td><Link className="record-link" href={`/loans/${l.id}`}>{l.code}</Link></td><td>{date(l.loanDate)}</td><td>{money(l.netAmount)}</td><td>{l.interestRate}%</td><td>{money(l.totalAmount)}</td><td>{l.paidInstallments} pagas<small className="table-sub">{l.pendingInstallments} pendentes de {l.installmentCount}</small></td><td>{money(l.paidAmount)}</td><td><StatusPill status={l.status}/></td><td className="align-right amount-cell">{money(l.balance)}</td><td><Link className="row-arrow" href={`/loans/${l.id}`} aria-label={`Abrir empréstimo ${l.code}`}><ArrowRight size={15}/></Link></td></tr>)}</tbody></table></div>;
+}
 function LoansPage() {
   const [search, setSearch] = useState(''); const [status, setStatus] = useState(''); const [showFilters, setShowFilters] = useState(false);
   const params = { ...(search ? { search } : {}), ...(status ? { status: status as LoanStatus } : {}) };
@@ -181,7 +184,7 @@ function LoanFormPage() {
   const clients = useListClients({ status: 'ATIVO' }); const create = useCreateLoan(); const qc = useQueryClient(); const [, setLocation] = useLocation(); const [error, setError] = useState('');
   const preset = new URLSearchParams(window.location.search).get('clientId') || '';
   function submit(e: FormEvent<HTMLFormElement>) { e.preventDefault(); setError(''); const f = new FormData(e.currentTarget); const data: LoanInput = { clientId: String(f.get('clientId') || ''), netAmount: Number(f.get('netAmount')), interestRate: Number(f.get('interestRate')), lateInterestRate: Number(f.get('lateInterestRate')), installmentCount: Number(f.get('installmentCount')), term: String(f.get('term') || '').trim(), frequency: String(f.get('frequency') || 'MENSUAL') as LoanFrequency, paymentDay: String(f.get('paymentDay') || '') ? Number(f.get('paymentDay')) : null, loanDate: String(f.get('loanDate') || ''), firstDueDate: String(f.get('firstDueDate') || ''), notes: String(f.get('notes') || '').trim() || null }; create.mutate({ data }, { onSuccess: loan => { qc.invalidateQueries({ queryKey: getListLoansQueryKey() }); qc.invalidateQueries({ queryKey: getGetDashboardQueryKey() }); qc.invalidateQueries({ queryKey: getGetClientHistoryQueryKey(loan.clientId) }); setLocation(`/loans/${loan.id}`); }, onError: () => setError('Não foi possível criar o empréstimo. Confira os valores e tente novamente.') }); }
-  return <><div className="back-link"><Link href="/loans"><ArrowLeft size={15}/> Voltar para empréstimos</Link></div><PageTitle eyebrow="NOVO CONTRATO" title="Criar empréstimo" description="Vincule um contrato a um cliente e defina suas condições de pagamento."/>
+  return <><div className="back-link"><Link href="/loans"><ArrowLeft size={15}/> Voltar para empréstimos</Link></div><PageTitle eyebrow="NOVO CONTRATO" title="Criar empréstimo" description="Vincule um contrato a um cliente e defina suas condições de pagamento."/><div className="calculation-note"><CircleDollarSign size={17}/><span><b>Regras financeiras aplicadas no servidor</b><small>Juros simples totais aplicados uma vez ao capital. Mora calculada por dia sobre o saldo vencido.</small></span></div>
     {clients.isLoading ? <SkeletonRows count={4}/> : clients.isError ? <ErrorState onRetry={()=>clients.refetch()}/> : !clients.data?.length ? <Panel><EmptyState title="Cadastre um cliente antes" detail="Todo empréstimo precisa pertencer a um cliente ativo." action={<Link className="button button-primary" href="/clients/new"><Plus size={15}/> Cadastrar cliente</Link>}/></Panel> : <Panel className="form-panel"><form onSubmit={submit}><div className="form-section-head"><span className="section-number">01</span><div><b>Vínculo e valores</b><small>O empréstimo ficará associado ao histórico do cliente.</small></div></div><div className="form-grid"><Field label="Cliente *" wide><select name="clientId" defaultValue={preset} required><option value="">Selecione um cliente</option>{clients.data.map(c=><option key={c.id} value={c.id}>{c.fullName} · {c.code}</option>)}</select></Field><Field label="Valor líquido (R$) *"><input name="netAmount" type="number" min="0.01" step="0.01" required placeholder="0,00"/></Field><Field label="Taxa de juros (%) *"><input name="interestRate" type="number" min="0" step="0.01" required defaultValue="0"/></Field><Field label="Juros por atraso (%)"><input name="lateInterestRate" type="number" min="0" step="0.01" defaultValue="0"/></Field><Field label="Quantidade de parcelas *"><input name="installmentCount" type="number" min="1" max="1200" required placeholder="Ex.: 12"/></Field></div><div className="form-section-head section-spaced"><span className="section-number">02</span><div><b>Calendário do contrato</b><small>Datas e frequência de vencimento.</small></div></div><div className="form-grid"><Field label="Prazo / descrição *"><input name="term" required maxLength={120} placeholder="Ex.: 12 meses"/></Field><Field label="Frequência *"><select name="frequency" defaultValue="MENSUAL"><option value="DIARIA">Diária</option><option value="SEMANAL">Semanal</option><option value="QUINCENAL">Quinzenal</option><option value="MENSUAL">Mensal</option></select></Field><Field label="Dia de pagamento"><input name="paymentDay" type="number" min="1" max="31" placeholder="Dia do mês"/></Field><Field label="Data do empréstimo *"><input name="loanDate" type="date" required defaultValue={new Date().toISOString().slice(0,10)}/></Field><Field label="Primeiro vencimento *"><input name="firstDueDate" type="date" required/></Field><Field label="Observações" wide><textarea name="notes" rows={3} maxLength={3000} placeholder="Condições ou informações adicionais"/></Field></div>{error && <p className="form-error">{error}</p>}<div className="form-actions"><Link href="/loans" className="button button-quiet">Cancelar</Link><Button type="submit" disabled={create.isPending}>{create.isPending ? 'Criando…' : <><Check size={16}/> Criar empréstimo</>}</Button></div></form></Panel>}
   </>;
 }
@@ -200,11 +203,186 @@ function LoanDetailPage() {
 }
 function InstallmentRow({ installment: i, loanId }: { installment: Installment; loanId: string }) { return <tr data-testid={`row-installment-${i.id}`}><td><span className="installment-number">{String(i.number).padStart(2,'0')}</span><small className="table-sub">de contrato</small></td><td>{date(i.dueDate)}</td><td><StatusPill status={i.status}/></td><td>{money(i.paidAmount)}<small className="table-sub">de {money(i.scheduledAmount)}</small></td><td className="align-right amount-cell">{money(i.balance)}</td><td>{i.status !== 'PAGADA' && i.status !== 'CANCELADA' ? <Link className="row-arrow" href={`/loans/${loanId}/payments/new?installmentId=${i.id}`} aria-label={`Registrar pagamento da parcela ${i.number}`}><Plus size={15}/></Link> : <span className="paid-check"><Check size={15}/></span>}</td></tr>; }
 function PaymentFormPage() {
-  const { id = '' } = useParams<{ id: string }>(); const [, setLocation] = useLocation(); const qc = useQueryClient(); const query = useGetLoan(id, { query: { queryKey: getGetLoanQueryKey(id), enabled: !!id } }); const register = useRegisterPayment(); const preset = new URLSearchParams(window.location.search).get('installmentId') || ''; const [error, setError] = useState('');
-  if (query.isLoading) return <SkeletonRows count={5}/>; if (query.isError || !query.data) return <ErrorState onRetry={()=>query.refetch()}/>;
-  const openInstallments = query.data.installments.filter(i=>i.status !== 'PAGADA' && i.status !== 'CANCELADA');
-  function submit(e: FormEvent<HTMLFormElement>) { e.preventDefault(); setError(''); const f = new FormData(e.currentTarget); const payment: PaymentInput = { installmentId: String(f.get('installmentId') || ''), principalAmount: Number(f.get('principalAmount')), lateAmount: Number(f.get('lateAmount') || 0), method: String(f.get('method') || 'PIX') as PaymentMethod, paidAt: String(f.get('paidAt') || '') || null, notes: String(f.get('notes') || '').trim() || null }; register.mutate({ id, data: payment }, { onSuccess: () => { qc.invalidateQueries({ queryKey: getGetLoanQueryKey(id) }); qc.invalidateQueries({ queryKey: getListLoansQueryKey() }); qc.invalidateQueries({ queryKey: getGetDashboardQueryKey() }); qc.invalidateQueries({ queryKey: getGetClientHistoryQueryKey(query.data!.loan.clientId) }); setLocation(`/loans/${id}`); }, onError: () => setError('Não foi possível registrar o pagamento. Confira o valor e a parcela selecionada.') }); }
-  return <><div className="back-link"><Link href={`/loans/${id}`}><ArrowLeft size={15}/> Voltar ao empréstimo</Link></div><PageTitle eyebrow={`PAGAMENTO · ${query.data.loan.code}`} title="Registrar recebimento" description={`${query.data.clientName} · saldo em aberto ${money(query.data.loan.balance)}`}/>{!openInstallments.length ? <Panel><EmptyState title="Não há parcelas em aberto" detail="Este empréstimo não possui parcelas disponíveis para receber." action={<Link className="button button-secondary" href={`/loans/${id}`}>Voltar ao empréstimo</Link>}/></Panel> : <Panel className="form-panel payment-form-panel"><form onSubmit={submit}><div className="form-section-head"><span className="section-number">01</span><div><b>Identificação do recebimento</b><small>O pagamento ficará vinculado a uma parcela específica.</small></div></div><div className="form-grid"><Field label="Parcela *" wide><select name="installmentId" required defaultValue={preset}><option value="">Selecione uma parcela</option>{openInstallments.map(i=><option key={i.id} value={i.id}>Parcela {i.number} · vence {date(i.dueDate)} · saldo {money(i.balance)}</option>)}</select></Field><Field label="Valor principal (R$) *"><input name="principalAmount" type="number" step="0.01" min="0.01" required placeholder="0,00"/></Field><Field label="Juros por atraso (R$)"><input name="lateAmount" type="number" step="0.01" min="0" defaultValue="0"/></Field><Field label="Forma de pagamento *"><select name="method" defaultValue="PIX"><option value="PIX">Pix</option><option value="EFETIVO">Dinheiro</option><option value="TRANSFERENCIA">Transferência</option><option value="OTRO">Outro</option></select></Field><Field label="Data do pagamento"><input name="paidAt" type="datetime-local" defaultValue={new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16)}/></Field><Field label="Observações" wide><textarea name="notes" rows={3} maxLength={1000} placeholder="Referência ou observação do recebimento"/></Field></div>{error && <p className="form-error">{error}</p>}<div className="payment-notice"><ShieldCheck size={17}/><span>O recebimento será registrado no histórico desta parcela e do cliente.</span></div><div className="form-actions"><Link className="button button-quiet" href={`/loans/${id}`}>Cancelar</Link><Button type="submit" disabled={register.isPending}>{register.isPending ? 'Registrando…' : <><Check size={16}/> Confirmar pagamento</>}</Button></div></form></Panel>}</>;
+  const { id = '' } = useParams<{ id: string }>();
+  const [, setLocation] = useLocation();
+  const qc = useQueryClient();
+  const query = useGetLoan(id, {
+    query: { queryKey: getGetLoanQueryKey(id), enabled: !!id },
+  });
+  const register = useRegisterPayment();
+  const preset =
+    new URLSearchParams(window.location.search).get('installmentId') || '';
+  const [error, setError] = useState('');
+
+  if (query.isLoading) return <SkeletonRows count={5} />;
+  if (query.isError || !query.data) {
+    return <ErrorState onRetry={() => query.refetch()} />;
+  }
+  const loanDetail = query.data;
+  const openInstallments = loanDetail.installments.filter(
+    (installment) =>
+      installment.status !== 'PAGADA' &&
+      installment.status !== 'CANCELADA' &&
+      installment.balance > 0,
+  );
+
+  function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError('');
+    const form = new FormData(e.currentTarget);
+    const localDate = String(form.get('paidAt') || '');
+    const payment: PaymentInput = {
+      idempotencyKey: crypto.randomUUID(),
+      installmentId: String(form.get('installmentId') || ''),
+      principalAmount: Number(form.get('principalAmount')),
+      method: String(form.get('method') || 'PIX') as PaymentMethod,
+      paidAt: localDate ? new Date(localDate).toISOString() : null,
+      notes: String(form.get('notes') || '').trim() || null,
+    };
+    register.mutate(
+      { id, data: payment },
+      {
+        onSuccess: () => {
+          void qc.invalidateQueries({ queryKey: getGetLoanQueryKey(id) });
+          void qc.invalidateQueries({ queryKey: getListLoansQueryKey() });
+          void qc.invalidateQueries({ queryKey: getGetDashboardQueryKey() });
+          void qc.invalidateQueries({
+            queryKey: getGetClientHistoryQueryKey(loanDetail.loan.clientId),
+          });
+          setLocation(`/loans/${id}`);
+        },
+        onError: () =>
+          setError(
+            'Não foi possível registrar o pagamento. Confira o valor e a parcela selecionada.',
+          ),
+      },
+    );
+  }
+
+  return (
+    <>
+      <div className="back-link">
+        <Link href={`/loans/${id}`}>
+          <ArrowLeft size={15} /> Voltar ao empréstimo
+        </Link>
+      </div>
+      <PageTitle
+        eyebrow={`PAGAMENTO · ${loanDetail.loan.code}`}
+        title="Registrar recebimento"
+        description={`${loanDetail.clientName} · saldo em aberto ${money(loanDetail.loan.balance)}`}
+      />
+      {!openInstallments.length ? (
+        <Panel>
+          <EmptyState
+            title="Não há parcelas em aberto"
+            detail="Este empréstimo não possui parcelas disponíveis para receber."
+            action={
+              <Link className="button button-secondary" href={`/loans/${id}`}>
+                Voltar ao empréstimo
+              </Link>
+            }
+          />
+        </Panel>
+      ) : (
+        <Panel className="form-panel payment-form-panel">
+          <form onSubmit={submit}>
+            <div className="form-section-head">
+              <span className="section-number">01</span>
+              <div>
+                <b>Identificação do recebimento</b>
+                <small>O pagamento ficará vinculado a uma parcela específica.</small>
+              </div>
+            </div>
+            <div className="form-grid">
+              <Field label="Parcela *" wide>
+                <select
+                  name="installmentId"
+                  required
+                  defaultValue={preset}
+                >
+                  <option value="">Selecione uma parcela</option>
+                  {openInstallments.map((installment) => (
+                    <option key={installment.id} value={installment.id}>
+                      Parcela {installment.number} · vence {date(installment.dueDate)} · saldo{' '}
+                      {money(installment.balance)}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field
+                label="Valor destinado à parcela (R$) *"
+                hint="Aplicado ao saldo programado da parcela."
+              >
+                <input
+                  name="principalAmount"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  required
+                  placeholder="0,00"
+                />
+              </Field>
+              <div className="payment-info-field">
+                <b>Mora diária automática</b>
+                <span>
+                  O servidor calcula os dias de atraso e registra a mora no abono.
+                </span>
+              </div>
+              <Field label="Forma de pagamento *">
+                <select name="method" defaultValue="PIX">
+                  <option value="PIX">Pix</option>
+                  <option value="EFETIVO">Dinheiro</option>
+                  <option value="TRANSFERENCIA">Transferência</option>
+                  <option value="OTRO">Outro</option>
+                </select>
+              </Field>
+              <Field label="Data e hora do pagamento">
+                <input
+                  name="paidAt"
+                  type="datetime-local"
+                  defaultValue={new Date(
+                    Date.now() - new Date().getTimezoneOffset() * 60_000,
+                  )
+                    .toISOString()
+                    .slice(0, 16)}
+                />
+              </Field>
+              <Field label="Observações" wide>
+                <textarea
+                  name="notes"
+                  rows={3}
+                  maxLength={1000}
+                  placeholder="Referência ou observação do recebimento"
+                />
+              </Field>
+            </div>
+            {error && <p className="form-error">{error}</p>}
+            <div className="payment-notice">
+              <ShieldCheck size={17} />
+              <span>
+                O abono e a mora calculada ficarão no histórico desta parcela,
+                do empréstimo e do cliente.
+              </span>
+            </div>
+            <div className="form-actions">
+              <Link className="button button-quiet" href={`/loans/${id}`}>
+                Cancelar
+              </Link>
+              <Button type="submit" disabled={register.isPending}>
+                {register.isPending ? (
+                  'Registrando…'
+                ) : (
+                  <>
+                    <Check size={16} /> Confirmar pagamento
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </Panel>
+      )}
+    </>
+  );
 }
 function SettingsPage() {
   const userQuery = useGetCurrentUser(); const { data: events, isLoading, isError, refetch } = useListAuditEvents({ limit: 8 });
