@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   date,
   index,
@@ -7,7 +8,6 @@ import {
   pgEnum,
   pgTable,
   serial,
-  sql,
   text,
   timestamp,
   uniqueIndex,
@@ -102,7 +102,6 @@ export const loansTable = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     codeNumber: serial("code_number").notNull().unique(),
     code: text("code").notNull().unique(),
-    idempotencyKey: text("idempotency_key").notNull().unique(),
     clientId: uuid("client_id")
       .notNull()
       .references(() => clientsTable.id, { onDelete: "restrict" }),
@@ -199,6 +198,7 @@ export const paymentsTable = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     codeNumber: serial("code_number").notNull().unique(),
     code: text("code").notNull().unique(),
+    idempotencyKey: text("idempotency_key").notNull().unique(),
     clientId: uuid("client_id")
       .notNull()
       .references(() => clientsTable.id, { onDelete: "restrict" }),
